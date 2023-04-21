@@ -6,6 +6,8 @@ import (
 	"net"
 	"sync"
 	"github.com/dzem87/is105sem03/mycrypt"
+	"github.com/dzem87/minyr/yr"
+	
 )
 
 func main() {
@@ -41,10 +43,35 @@ func main() {
 					dekryptertMelding := mycrypt.Krypter([]rune(string(buf[:n])), mycrypt.ALF_SEM03, len(mycrypt.ALF_SEM03)-4)
 					log.Println("Dekrypter melding: ", string(dekryptertMelding))
 					switch msg := string(dekryptertMelding); msg {
-  				        case string(dekryptertMelding):
-						_, err = c.Write([]byte(string(dekryptertMelding)))
+
+					case "Kjevik;SN39040;18.03.2022 01:50;6":
+                                                fahrMelding, err := yr.CelsiusToFahrenheitLine(msg)
+                                                if err!= nil {
+                                                        log.Fatal(err)
+                                                }
+
+                                                kryptertFahrMelding := mycrypt.Krypter([]rune(fahrMelding), mycrypt.ALF_SEM03, 4)
+                                                _, err = c.Write([]byte(string(kryptertFahrMelding)))
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						log.Println("Kryptert til:", string(kryptertFahrMelding))
+
+  				        case msg:
+						kryptertMelding := mycrypt.Krypter([]rune(dekryptertMelding), mycrypt.ALF_SEM03, 4)
+						_, err = c.Write([]byte(string(kryptertMelding)))
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						log.Println("Kryptert til:", kryptertMelding)
+
 					default:
 						_, err = c.Write(buf[:n])
+						if err!= nil {
+							log.Fatal(err)
+						}
 					}
 					if err != nil {
 						if err != io.EOF {
